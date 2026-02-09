@@ -2,7 +2,7 @@
 
 Rewriting the GNU coreutils.
 
-Was inspired by busybox and this [video](https://www.youtube.com/watch?v=HfRlzYihRr0<F21>) by xyve.
+Was inspired by busybox and [this video](https://www.youtube.com/watch?v=HfRlzYihRr0<F21>) by xyve.
 
 Resources:
 - [List of POSIX commands Wikipedia](https://en.wikipedia.org/wiki/List_of_POSIX_commands)

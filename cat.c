@@ -3,7 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-// `cat` takes in a series of filenames and prints them out to stdout
+// The `cat` I'll make takes in a series of filenames and prints them out to
+// stdout
 
 int
 main(int argc, const char *argv[])
@@ -25,7 +26,7 @@ main(int argc, const char *argv[])
             return EXIT_FAILURE;
         }
 
-        // File opened, pritnt contents
+        // File opened, print contents
 
         return EXIT_SUCCESS;
     }

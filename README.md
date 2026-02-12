@@ -12,3 +12,5 @@ Resources:
 
 I'll skip over some like mkdir since it's just a wrapper for the syscall and
 it'll be 20 lines. Some are still WIP (like `grep`).
+
+The shell (`ashew`) was written using man pages and [this article](https://brennan.io/2015/01/16/write-a-shell-in-c/).

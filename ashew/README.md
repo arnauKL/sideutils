@@ -13,7 +13,8 @@ arg 2: error"
 ```
 
 ## Limitations / future expansions:
-- No piping or redirecting
+- No piping
+- No redirecting
 - No globbing
 - Input parsing is very limited:
     - commands have to be in one line

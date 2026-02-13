@@ -1,6 +1,6 @@
 
-all:
-	gcc ashew.c -o ashew
+ashew: ashew.c
+	cc ashew.c -o ashew
 
 run:
 	./ashew

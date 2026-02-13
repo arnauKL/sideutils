@@ -1,38 +1,93 @@
 // ashew: dummy shell
 // WIP
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
-#define MAX_SIZE 4096
+#define READ_LINE_BUFFER_SIZE 256
 
-char *
-ashew_read_line(void)
+#define TOKEN_BUFFER_SIZE 64
+#define TOKEN_DELIMITER                                                                            \
+    " \t\r\n\a" // very limited, should be expanded. Ignores
+                // quotes, escaping sequences, etc.
+
+void ashew_loop(void);
+int execute(char **args);
+int launch(char **args);
+char *read_line(void);
+char **split_line(char *line);
+// Builtins:
+int ashew_cd(char **args);
+int ashew_exit(char **args);
+int ashew_help(char **args);
+
+char *builtin_str[] = {"cd", "help", "exit"};
+
+int (*builtin_func[])(char **) = {&ashew_cd, &ashew_help, &ashew_exit};
+
+int
+ashew_num_builtins()
 {
-    char *buf = malloc(sizeof(char) * MAX_SIZE);
-    int idx = 0;
+    return sizeof(builtin_str) / sizeof(char *);
+}
 
-    if (!buf) {
-        perror("malloc");
-        exit(EXIT_FAILURE);
+// ----------------- function implementations -----------------
+
+int
+main(int argc, char *argv[])
+{
+    ashew_loop();
+    return EXIT_SUCCESS;
+}
+
+int
+ashew_cd(char **args)
+{
+    if (args[1] == NULL) {
+        fprintf(stderr, "ashew: expected argument to \"cd\"\n");
+        return 1;
     }
 
-    while (1) {
-        // Read char by char
-        char c = getchar(); // This should be an int bcs EOF is an int
-                            // but when will I get EOF in a shell?
-        buf[idx++] = c;
-
-        if (idx == MAX_SIZE) {
-            // Reallocate buffer
-        }
+    if (chdir(args[1]) != 0) {
+        fprintf(stderr, "ashew: %s", strerror(errno));
     }
-    return buf;
+
+    return 1;
+}
+
+int
+ashew_exit(char **args)
+{
+    return 0;
+}
+
+int
+ashew_help(char **args)
+{
+    // Following ash's help
+
+    fprintf(stdout, "Built-in commands: \n");
+    fprintf(stdout, "------------------ \n");
+    for (int i = 0; i < ashew_num_builtins(); i++) {
+        fprintf(stdout, "%s ", builtin_str[i]);
+    }
+    fprintf(stdout, "\n");
+    return 1;
 }
 
 void
 ashew_loop(void)
 {
+    /* Basic loop of a shell:
+     * Read: Read the command from standard input.
+     * Parse: Separate the command string into a program and arguments.
+     * Execute: Run the parsed command.
+     */
+
     int ok = 1;
     char *line;
     char **args; // parsed from line
@@ -40,19 +95,140 @@ ashew_loop(void)
     do {
         printf("ashew > ");
         fflush(stdout);
-        line = ashew_read_line();
-        // args = ashew_parse_args(line);
-        // ok = ashew_execute(args);
+        line = read_line();
+
+        args = split_line(line);
+
+        // print args:
+        // int i = 0;
+        // while (args[i] != NULL) {
+        //     printf("arg %d: %s\n", i, args[i]);
+        //     fflush(stdout);
+        //     i++;
+        // }
+        launch(args);
     } while (ok);
 }
 
 int
-main(int argc, char *argv[])
+execute(char **args)
 {
-    // Main loop
-    ashew_loop();
+    if (args[0] == NULL) {
+        // An empty command was entered.
+        return 1;
+    }
 
-    // Cleanup
+    for (int i = 0; i < ashew_num_builtins(); i++) {
+        // Check if it's any of our builtins
+        if (strcmp(args[0], builtin_str[i]) == 0) {
+            return (*builtin_func[i])(args);
+        }
+    }
 
-    return EXIT_SUCCESS;
+    return launch(args);
+}
+
+int
+launch(char **args)
+{
+    pid_t pid, wpid;
+    int status;
+
+    pid = fork();
+    // Now we have 2 threads:
+
+    if (pid == 0) {
+        // Child process
+        // execvp does the execution of the arguments
+        if (execvp(args[0], args) == -1) {
+            fprintf(stderr, "ashew: %s: %s\n", args[0], strerror(errno));
+        }
+    } else if (pid < 0) {
+        fprintf(stderr, "ashew: %s\n", strerror(errno));
+    } else {
+        // Parent thread
+        do {
+            // Wait for the child to finish (what are these flags)
+            wpid = waitpid(pid, &status, WUNTRACED);
+        } while (!WIFEXITED(status) && !WIFSIGNALED(status));
+    }
+
+    return 1;
+}
+
+char *
+read_line(void)
+{
+    // Start with a block and if the user exceeds, realloc
+    char *buffer = malloc(sizeof(char) * READ_LINE_BUFFER_SIZE);
+    int buffer_size = READ_LINE_BUFFER_SIZE;
+    int idx = 0;
+
+    if (!buffer) {
+        fprintf(stderr, "ashew: allocation error\n");
+        exit(EXIT_FAILURE);
+    }
+
+    // The following could also be done with getline()
+    int c = getchar(); // This should be an int bcs EOF is an int
+
+    while (c != EOF && c != '\n') {
+
+        buffer[idx++] = c;
+
+        // If we exceed the buffer, reallocate
+        if (idx >= buffer_size) {
+            // Doubling in size might be a bit too much
+            buffer_size += READ_LINE_BUFFER_SIZE;
+            buffer = realloc(buffer, buffer_size);
+
+            if (!buffer) {
+                fprintf(stderr, "ashew: reallocation error\n");
+                exit(EXIT_FAILURE);
+            }
+        }
+
+        // Get the next char
+        c = getchar();
+    }
+
+    buffer[idx] = '\0'; // Terminate
+    return buffer;
+}
+
+char **
+split_line(char *line)
+{
+    int buffer_size = TOKEN_BUFFER_SIZE;
+    char **tokens = malloc(buffer_size * sizeof(char *));
+    char *token = NULL;
+    int idx = 0;
+
+    if (!tokens) {
+        fprintf(stderr, "ashew: allocation error\n");
+        exit(EXIT_FAILURE);
+    }
+
+    token = strtok(line, TOKEN_DELIMITER);
+
+    while (token != NULL) {
+        tokens[idx++] = token;
+
+        if (idx >= buffer_size) {
+            // Reallocate
+            buffer_size += TOKEN_BUFFER_SIZE;
+            tokens = realloc(tokens, buffer_size * sizeof(char *));
+
+            if (!tokens) {
+                fprintf(stderr, "ashew: reallocation error\n");
+                exit(EXIT_FAILURE);
+            }
+        }
+
+        // strtok has state, stores the next char after the split token:
+        token = strtok(NULL, TOKEN_DELIMITER); // That's why NULL is passed
+    }
+
+    tokens[idx] = NULL;
+    return tokens;
 }

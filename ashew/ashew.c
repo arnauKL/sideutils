@@ -106,7 +106,12 @@ ashew_loop(void)
         //     fflush(stdout);
         //     i++;
         // }
-        launch(args);
+
+        ok = execute(args);
+
+        free(line);
+        free(args);
+
     } while (ok);
 }
 

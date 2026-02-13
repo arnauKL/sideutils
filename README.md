@@ -1,23 +1,11 @@
-# POSIX stuff: ashew & sideutils
+# POSIX stuff: ashew (shell) & sideutils (coreutils)
 
-Rewriting some UNIX coreutils.
+Rewriting some coreutils.
 
-The repo consists of two main parts:
-- **ashew**: A simple shell.
-- **sideutils**: Custom implementations of coreutils.
+*Structure:*
 
-## Directory Structure
-
-- /ashew: The main shell project. See [detailed README](ashew/README.md)
-- /sideutils: cat.c, ls.c, grep.c: Individual POSIX utility implementations.
-
-## Resources:
-
-- [List of POSIX commands Wikipedia](https://en.wikipedia.org/wiki/List_of_POSIX_commands)
-- Section 3 of man pages
-- [GNU coreutils source
-  code](https://github.com/coreutils/coreutils/tree/master)
-
+- /ashew: The main shell project. [See more](ashew/README.md)
+- /sideutils: cat.c, ls.c, grep.c
 
 ## Notes
 
@@ -27,7 +15,7 @@ The repo consists of two main parts:
 - I don't like having to decypher variable names when reading code.
   I try to keep mine very descriptive. Editors have autocomplete for a reason.
 
-- Built on raw educational procrastination
+- Raw procrastination
 
 - I'll skip over some like mkdir since it's just a wrapper for the syscall and
   it'll be 20 lines. Some are still WIP (like `grep` and the shell).

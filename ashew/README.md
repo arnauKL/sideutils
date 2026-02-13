@@ -13,11 +13,12 @@ arg 2: error"
 ```
 
 ## Limitations / future expansions:
-- No piping
+- No piping or redirecting
 - No globbing
 - Input parsing is very limited:
     - commands have to be in one line
     - parsing only splits on whitespaces (no quotes or escaping)
 - very few builtins
 - No arrow support
-- No Ctrl+L / R or similar
+- No signals
+- No history

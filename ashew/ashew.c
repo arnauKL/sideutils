@@ -79,15 +79,13 @@ ashew_help(char **args)
     return 1;
 }
 
+/* Basic loop of a shell:
+Read: Read the command from standard input.
+Parse: Separate the command string into a program and arguments.
+Execute: Run the parsed command. */
 void
 ashew_loop(void)
 {
-    /* Basic loop of a shell:
-     * Read: Read the command from standard input.
-     * Parse: Separate the command string into a program and arguments.
-     * Execute: Run the parsed command.
-     */
-
     int ok = 1;
     char *line;
     char **args; // parsed from line
@@ -96,17 +94,7 @@ ashew_loop(void)
         printf("ashew > ");
         fflush(stdout);
         line = read_line();
-
         args = split_line(line);
-
-        // print args:
-        // int i = 0;
-        // while (args[i] != NULL) {
-        //     printf("arg %d: %s\n", i, args[i]);
-        //     fflush(stdout);
-        //     i++;
-        // }
-
         ok = execute(args);
 
         free(line);
@@ -118,7 +106,7 @@ ashew_loop(void)
 int
 execute(char **args)
 {
-    if (args[0] == NULL) {
+    if (args == NULL || args[0] == NULL) { // Sweet short-circuit saves the day
         // An empty command was entered.
         return 1;
     }
@@ -147,13 +135,13 @@ launch(char **args)
         // execvp does the execution of the arguments
         if (execvp(args[0], args) == -1) {
             fprintf(stderr, "ashew: %s: %s\n", args[0], strerror(errno));
+            exit(EXIT_FAILURE); // If it returns, always kill the child process
         }
     } else if (pid < 0) {
         fprintf(stderr, "ashew: %s\n", strerror(errno));
     } else {
-        // Parent thread
+        // Parent thread, wait for child to end
         do {
-            // Wait for the child to finish (what are these flags)
             wpid = waitpid(pid, &status, WUNTRACED);
         } while (!WIFEXITED(status) && !WIFSIGNALED(status));
     }
@@ -177,18 +165,23 @@ read_line(void)
     // The following could also be done with getline()
     int c = getchar(); // This should be an int bcs EOF is an int
 
-    while (c != EOF && c != '\n') {
+    while (c != '\n') {
+
+        if (c == EOF) {
+            exit(EXIT_SUCCESS);
+        }
 
         buffer[idx++] = c;
 
         // If we exceed the buffer, reallocate
-        if (idx >= buffer_size) {
+        if (idx >= buffer_size - 1) { // Leave space for the terminator
             // Doubling in size might be a bit too much
             buffer_size += READ_LINE_BUFFER_SIZE;
-            buffer = realloc(buffer, buffer_size);
+            char *tmp_buffer = realloc(buffer, buffer_size);
 
-            if (!buffer) {
+            if (!tmp_buffer) {
                 fprintf(stderr, "ashew: reallocation error\n");
+                free(buffer);
                 exit(EXIT_FAILURE);
             }
         }
@@ -219,15 +212,18 @@ split_line(char *line)
     while (token != NULL) {
         tokens[idx++] = token;
 
-        if (idx >= buffer_size) {
+        if (idx >= buffer_size - 1) { // Leave room for the last NULL
             // Reallocate
             buffer_size += TOKEN_BUFFER_SIZE;
-            tokens = realloc(tokens, buffer_size * sizeof(char *));
-
-            if (!tokens) {
+            char **tmp_tokens = realloc(tokens, buffer_size * sizeof(char *));
+            if (!tmp_tokens) {
                 fprintf(stderr, "ashew: reallocation error\n");
-                exit(EXIT_FAILURE);
+                // Free original memory and return
+                free(tokens);
+                return NULL;
             }
+
+            tokens = tmp_tokens;
         }
 
         // strtok has state, stores the next char after the split token:

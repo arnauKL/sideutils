@@ -15,7 +15,7 @@ Rewriting some coreutils.
 - I don't like having to decypher variable names when reading code.
   I try to keep mine very descriptive. Editors have autocomplete for a reason.
 
-- Raw procrastination
-
 - I'll skip over some like mkdir since it's just a wrapper for the syscall and
   it'll be 20 lines. Some are still WIP (like `grep` and the shell).
+
+> Built on raw procrastination

@@ -1,7 +1,11 @@
-cp
-ls
-rm
-cat
-grep
-main
+sideutils/*
+!sideutils/**/*.c
+!sideutils/**/Makefile
+!sideutils/**/README.md
+
 ashew/ashew
+
+# Build stuff
+*.o
+*.a
+*.so

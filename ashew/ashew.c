@@ -14,6 +14,7 @@
 #define TOKEN_DELIMITER                                                                            \
     " \t\r\n\a" // very limited, should be expanded. Ignores
                 // quotes, escaping sequences, etc.
+#define REDIRECT_OPERATOR '>'
 
 void ashew_loop(void);
 int execute(char **args);
@@ -38,7 +39,8 @@ ashew_num_builtins()
 // ----------------- function implementations -----------------
 
 int
-main(int argc, char *argv[])
+// main(int argc, char *argv[])
+main(void)
 {
     ashew_loop();
     return EXIT_SUCCESS;
@@ -62,6 +64,7 @@ ashew_cd(char **args)
 int
 ashew_exit(char **args)
 {
+    // args are not used but this simplifies calling the function ptr
     return 0;
 }
 
@@ -210,6 +213,11 @@ split_line(char *line)
     token = strtok(line, TOKEN_DELIMITER);
 
     while (token != NULL) {
+
+        if (token[0] == REDIRECT_OPERATOR) {
+            // Redirection
+        }
+
         tokens[idx++] = token;
 
         if (idx >= buffer_size - 1) { // Leave room for the last NULL

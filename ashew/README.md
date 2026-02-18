@@ -21,20 +21,19 @@ ashew > cat "file name with spaces"
 # arg 4: spaces"
 ```
 
-## Limitations / future expansions:
-- [ ] No piping
-- [ ] No io redirecting
-- [ ] No globbing
-- [ ] naive input parsing using `strtok`:
-    - [ ] commands have to be in one line
-    - [ ] parsing only splits on whitespaces (no quotes or escaping)
-- [ ] very few builtins
-- [ ] No history
-    - [ ] No arrow-key support
+## Future expansions:
+- [ ] Piping
+- [ ] io redirecting
+- [ ] Globbing
+- [ ] Better input parsing than using naive `strtok`
+    - [ ] Multi line commands
+    - [ ] Parse more than just whitespaces
+- [ ] More builtins
+- [ ] History
+    - [ ] Arrow-key support
 - [ ] Add child count
-- [ ] Synchronous only (no & operator)
-
-- [x] No signal handling (readline)
+- [ ] Asynchronous (& operator)
+- [x] Signal handling (readline)
 
 ## Roadmap
 - Implement '>' (dup2?)

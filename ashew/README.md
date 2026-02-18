@@ -9,14 +9,6 @@ This is also an excuse to learn more C + UNIX.
 - [reference article](https://brennan.io/2015/01/16/write-a-shell-in-c/)
 - [POSIX headers](https://pubs.opengroup.org/onlinepubs/9699919799/)
 
-
-
-I built this to demystify how UNIX handles processes and to practice writing
-clean, maintainable C. Most shells use heavily abbreviated variable names for
-legacy reasons; ashew is an experiment in writing a shell that is easy to read
-and understand.
-
-
 ## Made with some very big simplifications
 aka:
 
@@ -30,18 +22,19 @@ ashew > cat "file name with spaces"
 ```
 
 ## Limitations / future expansions:
-- No piping
-- No io redirecting
-- No globbing
-- naive input parsing using `strtok`:
-    - commands have to be in one line
-    - parsing only splits on whitespaces (no quotes or escaping)
-- very few builtins
-- No arrow support
-- No signal handling
-- No history
-- Add child count
-- Synchronous only (no & operator)
+- [ ] No piping
+- [ ] No io redirecting
+- [ ] No globbing
+- [ ] naive input parsing using `strtok`:
+    - [ ] commands have to be in one line
+    - [ ] parsing only splits on whitespaces (no quotes or escaping)
+- [ ] very few builtins
+- [ ] No history
+    - [ ] No arrow-key support
+- [ ] Add child count
+- [ ] Synchronous only (no & operator)
+
+- [x] No signal handling (readline)
 
 ## Roadmap
 - Implement '>' (dup2?)

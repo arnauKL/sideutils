@@ -1,8 +1,7 @@
 # ashew: a tiny shell
 
-I'd like this to be an actual usable shell that is not 10k LOC, has sansane
-variable names (all editors have completion enabled, there is no excuse for
-abbreviating unreadable variable names) and performs decently well.
+I'd like this to be an actual usable shell that has sane variable names and
+performs decently.
 
 This is also an excuse to learn more C + UNIX.
 
@@ -10,6 +9,7 @@ This is also an excuse to learn more C + UNIX.
 - [POSIX headers](https://pubs.opengroup.org/onlinepubs/9699919799/)
 
 ## Made with some very big simplifications
+
 aka:
 
 ```sh

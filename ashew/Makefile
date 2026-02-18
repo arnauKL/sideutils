@@ -1,11 +1,12 @@
 TARGET = ashew
 CC = cc
 CFLAGS = -Wall -Wextra -pedantic -std=c11
+LIBS = -lreadline
 
 all: $(TARGET)
 
 $(TARGET): ashew.c
-	$(CC) $(CFLAGS) ashew.c -o $(TARGET)
+	$(CC) $(CFLAGS) $(LIBS) ashew.c -o $(TARGET)
 
 .PHONY: run clean
 

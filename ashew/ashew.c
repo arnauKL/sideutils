@@ -2,6 +2,7 @@
 // WIP
 
 #include <errno.h>
+#include <readline/readline.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,7 +20,6 @@
 void ashew_loop(void);
 int execute(char **args);
 int launch(char **args);
-char *read_line(void);
 char **split_line(char *line);
 // Builtins:
 int ashew_cd(char **args);
@@ -90,20 +90,16 @@ void
 ashew_loop(void)
 {
     int ok = 1;
-    char *line;
+    char *line;  // gets malloc-ed by readline
     char **args; // parsed from line
 
-    do {
-        printf("ashew > ");
-        fflush(stdout);
-        line = read_line();
+    while (ok && (line = readline("ashew > ")) != NULL) {
         args = split_line(line);
         ok = execute(args);
 
         free(line);
         free(args);
-
-    } while (ok);
+    }
 }
 
 int
@@ -127,7 +123,7 @@ execute(char **args)
 int
 launch(char **args)
 {
-    pid_t pid, wpid;
+    pid_t pid, wpid; /* I should be using wpid for sth */
     int status;
 
     pid = fork();
@@ -150,51 +146,6 @@ launch(char **args)
     }
 
     return 1;
-}
-
-char *
-read_line(void)
-{
-    // Start with a block and if the user exceeds, realloc
-    char *buffer = malloc(sizeof(char) * READ_LINE_BUFFER_SIZE);
-    int buffer_size = READ_LINE_BUFFER_SIZE;
-    int idx = 0;
-
-    if (!buffer) {
-        fprintf(stderr, "ashew: allocation error\n");
-        exit(EXIT_FAILURE);
-    }
-
-    // The following could also be done with getline()
-    int c = getchar(); // This should be an int bcs EOF is an int
-
-    while (c != '\n') {
-
-        if (c == EOF) {
-            exit(EXIT_SUCCESS);
-        }
-
-        buffer[idx++] = c;
-
-        // If we exceed the buffer, reallocate
-        if (idx >= buffer_size - 1) { // Leave space for the terminator
-            // Doubling in size might be a bit too much
-            buffer_size += READ_LINE_BUFFER_SIZE;
-            char *tmp_buffer = realloc(buffer, buffer_size);
-
-            if (!tmp_buffer) {
-                fprintf(stderr, "ashew: reallocation error\n");
-                free(buffer);
-                exit(EXIT_FAILURE);
-            }
-        }
-
-        // Get the next char
-        c = getchar();
-    }
-
-    buffer[idx] = '\0'; // Terminate
-    return buffer;
 }
 
 char **

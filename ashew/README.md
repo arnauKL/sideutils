@@ -8,18 +8,9 @@ This is also an excuse to learn more C + UNIX.
 - [reference article](https://brennan.io/2015/01/16/write-a-shell-in-c/)
 - [POSIX headers](https://pubs.opengroup.org/onlinepubs/9699919799/)
 
-## Made with some very big simplifications
+I started using the realine library.
+It might be overkill.
 
-aka:
-
-```sh
-ashew > cat "file name with spaces"
-# This currently splits into:
-# arg 1: "file
-# arg 2: name
-# arg 3: with
-# arg 4: spaces"
-```
 
 ## Future expansions:
 - [ ] Piping
@@ -29,8 +20,9 @@ ashew > cat "file name with spaces"
     - [ ] Multi line commands
     - [ ] Parse more than just whitespaces
 - [ ] More builtins
-- [ ] History
-    - [ ] Arrow-key support
+- [x] History
+    - [x] Arrow-key support
+    - [ ] Write to file (reads but cannot write when quitting via C-c)
 - [ ] Add child count
 - [ ] Asynchronous (& operator)
 - [x] Signal handling (readline)

@@ -2,6 +2,7 @@
 // WIP
 
 #include <errno.h>
+#include <readline/history.h>
 #include <readline/readline.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,7 +10,11 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#define READ_LINE_BUFFER_SIZE 256
+#define PROGRAM_NAME "ashew"
+#define ASHEW_PROMPT "ashew > "
+
+#define HISTORY_FILE ".ashew_history"
+#define HISTORY_SIZE 10 // ridiculous
 
 #define TOKEN_BUFFER_SIZE 64
 #define TOKEN_DELIMITER                                                                            \
@@ -36,10 +41,7 @@ ashew_num_builtins()
     return sizeof(builtin_str) / sizeof(char *);
 }
 
-// ----------------- function implementations -----------------
-
 int
-// main(int argc, char *argv[])
 main(void)
 {
     ashew_loop();
@@ -50,12 +52,12 @@ int
 ashew_cd(char **args)
 {
     if (args[1] == NULL) {
-        fprintf(stderr, "ashew: expected argument to \"cd\"\n");
+        fprintf(stderr, "%s: expected argument to \"cd\"\n", PROGRAM_NAME);
         return 1;
     }
 
     if (chdir(args[1]) != 0) {
-        fprintf(stderr, "ashew: %s", strerror(errno));
+        fprintf(stderr, "%s: %s", PROGRAM_NAME, strerror(errno));
     }
 
     return 1;
@@ -89,17 +91,32 @@ Execute: Run the parsed command. */
 void
 ashew_loop(void)
 {
+#ifdef HISTORY_FILE
+    read_history(HISTORY_FILE); // readline lib does history for me
+#endif
+
+    using_history(); // readline lib does history for me
+    stifle_history(HISTORY_SIZE);
+
     int ok = 1;
     char *line;  // gets malloc-ed by readline
     char **args; // parsed from line
 
-    while (ok && (line = readline("ashew > ")) != NULL) {
+    while (ok && (line = readline(ASHEW_PROMPT)) != NULL) {
+        add_history(line);
+
         args = split_line(line);
         ok = execute(args);
 
         free(line);
         free(args);
     }
+
+#ifdef HISTORY_FILE
+    write_history(HISTORY_FILE);
+#endif
+
+    clear_history();
 }
 
 int
@@ -133,11 +150,11 @@ launch(char **args)
         // Child process
         // execvp does the execution of the arguments
         if (execvp(args[0], args) == -1) {
-            fprintf(stderr, "ashew: %s: %s\n", args[0], strerror(errno));
+            fprintf(stderr, "%s: %s\n", args[0], strerror(errno));
             exit(EXIT_FAILURE); // If it returns, always kill the child process
         }
     } else if (pid < 0) {
-        fprintf(stderr, "ashew: %s\n", strerror(errno));
+        fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
     } else {
         // Parent thread, wait for child to end
         do {
@@ -157,7 +174,7 @@ split_line(char *line)
     int idx = 0;
 
     if (!tokens) {
-        fprintf(stderr, "ashew: allocation error\n");
+        fprintf(stderr, "%s: allocation error\n", PROGRAM_NAME);
         exit(EXIT_FAILURE);
     }
 
@@ -176,7 +193,7 @@ split_line(char *line)
             buffer_size += TOKEN_BUFFER_SIZE;
             char **tmp_tokens = realloc(tokens, buffer_size * sizeof(char *));
             if (!tmp_tokens) {
-                fprintf(stderr, "ashew: reallocation error\n");
+                fprintf(stderr, "%s: reallocation error\n", PROGRAM_NAME);
                 // Free original memory and return
                 free(tokens);
                 return NULL;

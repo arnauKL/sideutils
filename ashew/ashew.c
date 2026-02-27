@@ -1,14 +1,16 @@
 // ashew: dummy shell
 // WIP
 
+// clang-format off
 #include <errno.h>
-#include <readline/history.h>
-#include <readline/readline.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <readline/history.h>
+#include <readline/readline.h>
+// clang-format on
 
 #define PROGRAM_NAME "ashew"
 #define ASHEW_PROMPT "ashew > "

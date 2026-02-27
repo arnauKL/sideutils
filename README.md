@@ -12,10 +12,8 @@ Rewriting some coreutils.
 - I was initially inspired by busybox and [this
   video](https://www.youtube.com/watch?v=HfRlzYihRr0<F21>) by xyve.
 
-- I don't like having to decypher variable names when reading code.
-  I try to keep mine very descriptive. Editors have autocomplete for a reason.
+- I don't like having to decypher variable names. I try to keep mine
+  descriptive. We have autocomplete.
 
 - I'll skip over some like mkdir since it's just a wrapper for the syscall and
   it'll be 20 lines. Some are still WIP (like `grep` and the shell).
-
-> Built on raw procrastination

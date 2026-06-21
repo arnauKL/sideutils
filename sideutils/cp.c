@@ -7,7 +7,9 @@
 #include <string.h>
 #include <unistd.h>
 
-int main(int argc, char* argv[]) {
+int
+main(int argc, char *argv[])
+{
 
     if (argc < 3) {
         fprintf(stderr, "cp: not enough arguments\n");
@@ -18,20 +20,19 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    const char* source = argv[1];
-    const char* dest = argv[2];
+    const char *source = argv[1];
+    const char *dest = argv[2];
 
-    FILE* fIn = fopen(source, "rb");
+    FILE *fIn = fopen(source, "rb");
     if (fIn == NULL) {
-        fprintf(stderr, "unable to open source file '%s': %s\n", source,
-                strerror(errno));
+        fprintf(stderr, "unable to open source file '%s': %s\n", source, strerror(errno));
         fclose(fIn);
         return EXIT_FAILURE;
     }
-    FILE* fOut = fopen(dest, "wb");
+
+    FILE *fOut = fopen(dest, "wb");
     if (fOut == NULL) {
-        fprintf(stderr, "unable to open dest file '%s': %s\n", dest,
-                strerror(errno));
+        fprintf(stderr, "unable to open dest file '%s': %s\n", dest, strerror(errno));
         fclose(fOut);
         return EXIT_FAILURE;
     }
